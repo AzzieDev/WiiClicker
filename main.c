@@ -2,19 +2,13 @@
 // gcc main.c -lxwiimote -lncurses -o main
 
 #include <errno.h>
-#include <fcntl.h>
-#include <inttypes.h>
-#include <math.h>
 #include <ncurses.h>
 #include <poll.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
-#include <time.h>
 #include <unistd.h>
 #include <xwiimote.h>
 
@@ -107,6 +101,7 @@ static void key_clear(void) {
 /* rumble events */
 
 static void rumble_show(bool on) {
+    printf("Toggled Rumble");
     mvprintw(1, 21, on ? "RUMBLE" : "      ");
 }
 
@@ -117,19 +112,10 @@ static void rumble_toggle(void) {
     on = !on;
     ret = xwii_iface_rumble(iface, on);
     if (ret) {
-       // print_error("Error: Cannot toggle rumble motor: %d", ret);
         on = !on;
     }
 
     rumble_show(on);
-}
-
-/* LEDs */
-
-static bool led_state[4];
-
-static void led_show(int n, bool on) {
-    mvprintw(5, 59 + n * 5, on ? "(#%i)" : " -%i ", n + 1);
 }
 
 
@@ -236,19 +222,14 @@ static void handle_watch(void) {
     static unsigned int num;
     int ret;
 
-    //print_info("Info: Watch Event #%u", ++num);
 
     ret = xwii_iface_open(iface, xwii_iface_available(iface) |
                                  XWII_IFACE_WRITABLE);
-    //if (ret)
-        //print_error("Error: Cannot open interface: %d", ret);
 
     refresh_all();
 }
 
 /* keyboard handling */
-
-
 
 static int keyboard(void) {
     int key;
@@ -287,26 +268,19 @@ static int run_iface(struct xwii_iface *iface) {
     fds_num = 2;
 
     ret = xwii_iface_watch(iface, true);
-    // if (ret)
-    //     print_error("Error: Cannot initialize hotplug watch descriptor");
 
     while (true) {
         ret = poll(fds, fds_num, -1);
         if (ret < 0) {
             if (errno != EINTR) {
                 ret = -errno;
-             //   print_error("Error: Cannot poll fds: %d", ret);
                 break;
             }
         }
 
         ret = xwii_iface_dispatch(iface, &event, sizeof(event));
         if (ret) {
-            // if (ret != -EAGAIN) {
-            //     print_error("Error: Read failed with err:%d",
-            //                 ret);
-            //     break;
-            // }
+
         } else if (!freeze) {
             switch (event.type) {
                 case XWII_EVENT_WATCH:
@@ -392,18 +366,6 @@ int main(int argc, char **argv) {
 //        printf("\ts: Refresh static values (like battery or calibration)\n");
 //        printf("\tk: Toggle key events\n");
 //        printf("\tr: Toggle rumble motor\n");
-//        printf("\ta: Toggle accelerometer\n");
-//        printf("\ti: Toggle IR camera\n");
-//        printf("\tm: Toggle motion plus\n");
-//        printf("\tn: Toggle normalization for motion plus\n");
-//        printf("\tb: Toggle balance board\n");
-//        printf("\tp: Toggle pro controller\n");
-//        printf("\tg: Toggle guitar controller\n");
-//        printf("\td: Toggle drums controller\n");
-//        printf("\t1: Toggle LED 1\n");
-//        printf("\t2: Toggle LED 2\n");
-//        printf("\t3: Toggle LED 3\n");
-//        printf("\t4: Toggle LED 4\n");
 //        ret = -1;
 //    } else
 //        if (!strcmp(argv[1], "list")) {
@@ -435,21 +397,15 @@ int main(int argc, char **argv) {
         ret = xwii_iface_open(iface,
                               xwii_iface_available(iface) |
                               XWII_IFACE_WRITABLE);
-        // if (ret)
-        //     print_error("Error: Cannot open interface: %d",
-        //                 ret);
-
         ret = run_iface(iface);
         xwii_iface_unref(iface);
         if (ret) {
-          //  print_error("Program failed; press any key to exit");
             refresh();
             timeout(-1);
             getch();
         }
         endwin();
     }
-    //}
 
     return abs(ret);
 }
