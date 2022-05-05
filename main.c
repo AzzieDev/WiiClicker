@@ -24,11 +24,20 @@ enum window_mode {
     MODE_EXTENDED,
 };
 
+
+
 static struct xwii_iface *iface;
 static unsigned int mode = MODE_ERROR;
 static bool freeze = false;
 
 /* error messages */
+
+static void nextSlide() {
+    hThread = GetWindowThreadProcessId(hwnd,&dwPID);
+    if (dwPID == dwProcessID && hThread!= NULL ) {
+        PostThreadMessage( hThread, WM_KEYDOWN,'A',1);
+    }
+}
 
 static void print_info(const char *format, ...) {
     va_list list;
