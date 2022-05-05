@@ -1,7 +1,7 @@
 // WiiClicker - Created by David Katz at Towson University
 
 // compile using:
-// gcc main.c -lxwiimote -lncurses -lxdo -o main
+// gcc wiiclicker.c -lxwiimote -lncurses -lxdo -o wiiclicker
 
 #include <errno.h>
 #include <ncurses.h>
@@ -15,7 +15,7 @@
 #include <xwiimote.h>
 #include <xdo.h>
 
-static struct xwii_iface *interface;
+static struct xwii_iface * interface;
 
 // shown whenever the screen updates
 void showCommands() {
@@ -30,10 +30,10 @@ void showCommands() {
 static bool locker = false;
 
 // converts button presses to keyboard mapping
-static void key_show(const struct xwii_event *event) {
+static void key_show(const struct xwii_event * event) {
 				// initialize xdo object for keyboard presses
-				xdo_t *x = xdo_new(NULL);
-				unsigned int code = event->v.key.code;
+				xdo_t * x = xdo_new(NULL);
+				unsigned int code = event -> v.key.code;
 				// prevent duplicates for key up vs key down
 				if (!locker) {
 								clear();
@@ -99,7 +99,7 @@ static void rumble_toggle() {
 static void battery_refresh() {
 				int ret;
 				uint8_t capacity;
-				ret = xwii_iface_get_battery(interface, &capacity);
+				ret = xwii_iface_get_battery(interface, & capacity);
 				if (!ret) {
 								clear();
 								mvprintw(7, 0, "Battery: %3u%%\n", capacity);
@@ -128,7 +128,7 @@ static int keyboard() {
 }
 
 // terminal interface to display output and accept keystrokes
-static int run_interface(struct xwii_iface *interface) {
+static int run_interface(struct xwii_iface * interface) {
 				struct xwii_event event;
 				int ret, fds_num;
 				struct pollfd fds[2];
@@ -146,14 +146,14 @@ static int run_interface(struct xwii_iface *interface) {
 																break;
 												}
 								}
-								ret = xwii_iface_dispatch(interface, &event, sizeof(event));
+								ret = xwii_iface_dispatch(interface, & event, sizeof(event));
 								if (!ret) {
 												switch (event.type) {
 																case XWII_EVENT_WATCH:
 																				battery_refresh();
 																				break;
 																case XWII_EVENT_KEY:
-																				key_show(&event);
+																				key_show( & event);
 																				break;
 												}
 								}
@@ -169,9 +169,9 @@ static int run_interface(struct xwii_iface *interface) {
 }
 
 // scan for wii remotes
-static char *get_dev() {
-				struct xwii_monitor *mon;
-				char *ent;
+static char * get_dev() {
+				struct xwii_monitor * mon;
+				char * ent;
 				int i = 0;
 				mon = xwii_monitor_new(false, false);
 				if (!mon) {
@@ -197,15 +197,15 @@ static char *get_dev() {
 }
 
 // primary procedure
-int main(char **argv) {
+int main(char ** argv) {
 				int ret = 0;
-				char *path = NULL;
+				char * path = NULL;
 				clear();
 
 				// we always get the first wii remote connected
 				path = get_dev();
 
-				ret = xwii_iface_new(&interface, path ? path : argv[1]);
+				ret = xwii_iface_new( & interface, path ? path : argv[1]);
 				free(path);
 				if (!ret) {
 								initscr();
