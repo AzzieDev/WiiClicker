@@ -189,30 +189,30 @@ static void setup_window(void) {
 
     i = 0;
     /* 80x24 Box */
-    mvprintw(i++, 0, "+- Keys ----------+ +------+ +---------------------------------+---------------+");
-    mvprintw(i++, 0, "|       +-+       | |      |  Accel x:       y:       z:       | XWIIMOTE SHOW |");
-    mvprintw(i++, 0, "|       | |       | +------+ +---------------------------------+---------------+");
-    mvprintw(i++, 0, "|     +-+ +-+     | IR #1:     x     #2:     x     #3:     x     #4:     x     |");
-    mvprintw(i++, 0, "|     |     |     | +--------------------------------+-------------------------+");
-    mvprintw(i++, 0, "|     +-+ +-+     | MP x:        y:        z:        | LED  -0   -1   -2   -3  |");
-    mvprintw(i++, 0, "|       | |       | +--------------------------+-----+----------------------+--+");
-    mvprintw(i++, 0, "|       +-+       | Battery:      |          | | Ext:                       |  |");
-    mvprintw(i++, 0, "|                 | +--------------------------+----------------------------+--+");
-    mvprintw(i++, 0, "|   +-+     +-+   | Device:                                                    |");
-    mvprintw(i++, 0, "|   | |     | |   | +----------------------------------------------------------+");
-    mvprintw(i++, 0, "|   +-+     +-+   |                                                            |");
-    mvprintw(i++, 0, "|                 |                                                            |");
-    mvprintw(i++, 0, "| ( ) |     | ( ) |                                                            |");
-    mvprintw(i++, 0, "|                 |                                                            |");
-    mvprintw(i++, 0, "|      +++++      |                                                            |");
-    mvprintw(i++, 0, "|      +   +      |                                                            |");
-    mvprintw(i++, 0, "|      +   +      | +----------------------------------------------------------+");
-    mvprintw(i++, 0, "|      +++++      | HINT: Keep the remote still and press 's' to recalibrate!  |");
-    mvprintw(i++, 0, "|                 | +----------------------------------------------------------+");
-    mvprintw(i++, 0, "|       | |       | |                                                          |");
-    mvprintw(i++, 0, "|       | |       | +----------------------------------------------------------+");
-    mvprintw(i++, 0, "|                 | |                                                           ");
-    mvprintw(i++, 0, "+-----------------+ |");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
+    mvprintw(i++, 0, "                                                                                ");
 }
 
 
