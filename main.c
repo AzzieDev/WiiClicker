@@ -1,5 +1,5 @@
 //compile using
-// gcc main.c -lxwiimote -lncurses -o main
+// gcc main.c -lxwiimote -lncurses -lxdo -o main
 
 #include <errno.h>
 #include <ncurses.h>
@@ -11,6 +11,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <xwiimote.h>
+#include <xdo.h>
+
 
 enum window_mode {
     MODE_ERROR,
@@ -19,21 +21,24 @@ enum window_mode {
 };
 
 
-
 static struct xwii_iface *iface;
 static unsigned int mode = MODE_ERROR;
 static bool freeze = false;
 
-// static void nextSlide() {
-//     hThread = GetWindowThreadProcessId(hwnd,&dwPID);
-//     if (dwPID == dwProcessID && hThread!= NULL ) {
-//         PostThreadMessage( hThread, WM_KEYDOWN,'A',1);
-//     }
-// }
+static bool locker = false;
+
 
 /* key events */
 
+
+
 static void key_show(const struct xwii_event *event) {
+
+    //code to map presses to keyboard
+    xdo_t *x = xdo_new(NULL);
+    printf("Simulating keypress: ");
+
+
     unsigned int code = event->v.key.code;
     bool pressed = event->v.key.state;
     char *str = NULL;
@@ -42,46 +47,54 @@ static void key_show(const struct xwii_event *event) {
         str = "X";
     else
         str = " ";
-
-    if (code == XWII_KEY_LEFT) {
-        mvprintw(4, 7, "%s", str);
-    } else if (code == XWII_KEY_RIGHT) {
-        mvprintw(4, 11, "%s", str);
-    } else if (code == XWII_KEY_UP) {
-        mvprintw(2, 9, "%s", str);
-    } else if (code == XWII_KEY_DOWN) {
-        mvprintw(6, 9, "%s", str);
-    } else if (code == XWII_KEY_A) {
-        if (pressed)
-            str = "A";
-        mvprintw(10, 5, "%s", str);
-    } else if (code == XWII_KEY_B) {
-        if (pressed)
-            str = "B";
-        mvprintw(10, 13, "%s", str);
-    } else if (code == XWII_KEY_HOME) {
-        if (pressed)
-            str = "HOME+";
-        else
-            str = "     ";
-        mvprintw(13, 7, "%s", str);
-    } else if (code == XWII_KEY_MINUS) {
-        if (pressed)
-            str = "-";
-        mvprintw(13, 3, "%s", str);
-    } else if (code == XWII_KEY_PLUS) {
-        if (pressed)
-            str = "+";
-        mvprintw(13, 15, "%s", str);
-    } else if (code == XWII_KEY_ONE) {
-        if (pressed)
-            str = "1";
-        mvprintw(20, 9, "%s", str);
-    } else if (code == XWII_KEY_TWO) {
-        if (pressed)
-            str = "2";
-        mvprintw(21, 9, "%s", str);
+    if (!locker) {
+        if (code == XWII_KEY_LEFT) {
+            printf("Left arrow\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "Left", 0);
+        } else if (code == XWII_KEY_RIGHT) {
+            printf("Right arrow\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "Right", 0);
+        } else if (code == XWII_KEY_UP) {
+            printf("Up arrow\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "Up", 0);
+        } else if (code == XWII_KEY_DOWN) {
+            printf("Down arrow\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "Down", 0);
+        } else if (code == XWII_KEY_A) {
+            if (pressed)
+                str = "A";
+            mvprintw(10, 5, "%s", str);
+        } else if (code == XWII_KEY_B) {
+            if (pressed)
+                str = "B";
+            mvprintw(10, 13, "%s", str);
+        } else if (code == XWII_KEY_HOME) {
+            if (pressed)
+                str = "HOME+";
+            else
+                str = "     ";
+            mvprintw(13, 7, "%s", str);
+        } else if (code == XWII_KEY_MINUS) {
+            if (pressed)
+                str = "-";
+            mvprintw(13, 3, "%s", str);
+        } else if (code == XWII_KEY_PLUS) {
+            if (pressed)
+                str = "+";
+            mvprintw(13, 15, "%s", str);
+        } else if (code == XWII_KEY_ONE) {
+            if (pressed)
+                str = "1";
+            mvprintw(20, 9, "%s", str);
+        } else if (code == XWII_KEY_TWO) {
+            if (pressed)
+                str = "2";
+            mvprintw(21, 9, "%s", str);
+        }
     }
+    locker = !locker;
+
+    xdo_free(x);
 }
 
 static void key_clear(void) {
@@ -92,10 +105,9 @@ static void key_clear(void) {
     for (i = 0; i < XWII_KEY_NUM; ++i) {
         ev.v.key.code = i;
         ev.v.key.state = 0;
-        key_show(&ev);
+        //key_show(&ev);
     }
 }
-
 
 
 /* rumble events */
@@ -119,7 +131,6 @@ static void rumble_toggle(void) {
 }
 
 
-
 /* battery status */
 
 static void battery_show(uint8_t capacity) {
@@ -139,7 +150,7 @@ static void battery_refresh(void) {
     ret = xwii_iface_get_battery(iface, &capacity);
     if (!ret)
         //print_error("Error: Cannot read battery capacity");
-    //else
+        //else
         battery_show(capacity);
 }
 
@@ -151,8 +162,8 @@ static void devtype_refresh(void) {
 
     ret = xwii_iface_get_devtype(iface, &name);
     if (!ret) {
-       // print_error("Error: Cannot read device type");
-    //} else {
+        // print_error("Error: Cannot read device type");
+        //} else {
         mvprintw(9, 28, "                                                   ");
         mvprintw(9, 28, "%s", name);
         free(name);
@@ -212,7 +223,7 @@ static void handle_resize(void) {
         erase();
         setup_window();
         refresh_all();
-     //   print_info("Info: Screen smaller than 160x48; limited view");
+        //   print_info("Info: Screen smaller than 160x48; limited view");
     }
 }
 
