@@ -1,4 +1,6 @@
-Key Mappings:
+WiiClicker
+
+Maps these 11 Wii Remote buttons to the following keys:
 
 0	XWII_KEY_LEFT, = Left arrow key
 1	XWII_KEY_RIGHT, = Right arrow key

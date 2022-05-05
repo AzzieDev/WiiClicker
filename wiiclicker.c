@@ -1,4 +1,6 @@
-//compile using
+// WiiClicker - Created by David Katz at Towson University
+
+// compile using:
 // gcc main.c -lxwiimote -lncurses -lxdo -o main
 
 #include <errno.h>
@@ -13,156 +15,101 @@
 #include <xwiimote.h>
 #include <xdo.h>
 
+static struct xwii_iface *interface;
 
-static struct xwii_iface *iface;
-static bool freeze = false;
+// shown whenever the screen updates
+void showCommands() {
+				mvprintw(1, 0, "WiiClicker by David Katz");
+				mvprintw(3, 0, "b: Show battery percentage");
+				mvprintw(4, 0, "r: Toggle rumble motor");
+				mvprintw(5, 0, "q: Quit application");
 
-//locker variable to prevent dupe key-presses
+}
+
+// locker variable to prevent dupe key-presses
 static bool locker = false;
 
-
-/* key events */
-
+// converts button presses to keyboard mapping
 static void key_show(const struct xwii_event *event) {
-
-//code to map presses to keyboard
+				// initialize xdo object for keyboard presses
 				xdo_t *x = xdo_new(NULL);
 				unsigned int code = event->v.key.code;
-				bool pressed = event->v.key.state;
-				char *str = NULL;
-
+				// prevent duplicates for key up vs key down
 				if (!locker) {
-								printf("Simulating keypress: ");
-
+								clear();
+								mvprintw(7, 0, "Wii Remote Button pressed:");
+								// check each of our key types and simulate presses accordingly
 								if (code == XWII_KEY_LEFT) {
-												printf("Left arrow\n");
+												mvprintw(8, 0, "D-Pad Left - Left Arrow key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Left", 0);
 								} else if (code == XWII_KEY_RIGHT) {
-												printf("Right arrow\n");
+												mvprintw(8, 0, "D-Pad Right - Right arrow key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Right", 0);
 								} else if (code == XWII_KEY_UP) {
-												printf("Up arrow\n");
+												mvprintw(8, 0, "D-Pad Up - Up arrow key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Up", 0);
 								} else if (code == XWII_KEY_DOWN) {
-												printf("Down arrow\n");
+												mvprintw(8, 0, "D-Pad Down - Down arrow key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Down", 0);
 								} else if (code == XWII_KEY_A) {
-												printf("A button - Spacebar\n");
+												mvprintw(8, 0, "A button - Space Bar key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "space", 0);
 								} else if (code == XWII_KEY_B) {
-												printf("B button - F5 key\n");
+												mvprintw(8, 0, "B button - F5 key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "F5", 0);
 								} else if (code == XWII_KEY_HOME) {
-												printf("Home button - Escape key\n");
+												mvprintw(8, 0, "Home button - Escape key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Escape", 0);
 								} else if (code == XWII_KEY_MINUS) {
-												printf("Minus button - Decrease volume\n");
+												mvprintw(8, 0, "Minus button - Decreasing volume");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "XF86AudioLowerVolume", 0);
 								} else if (code == XWII_KEY_PLUS) {
-												printf("Plus button - Increase volume\n");
+												mvprintw(8, 0, "Plus button - Increasing volume");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "XF86AudioRaiseVolume", 0);
 								} else if (code == XWII_KEY_ONE) {
-												printf("One button - Page Up key\n");
+												mvprintw(8, 0, "One button - Page Up key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Page_Up", 0);
 								} else if (code == XWII_KEY_TWO) {
-												printf("Two button - Page Down key\n");
+												mvprintw(8, 0, "Two button - Page Down key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Page_Down", 0);
 								}
 				}
+				showCommands();
 				locker = !locker;
-
+				// necessary to prevent overflow for xdo
 				xdo_free(x);
 }
 
-static void key_clear(void) {
-				struct xwii_event ev;
-				unsigned int i;
-
-				ev.type = XWII_EVENT_KEY;
-				for (i = 0; i < XWII_KEY_NUM; ++i) {
-								ev.v.key.code = i;
-								ev.v.key.state = 0;
-//key_show(&ev);
-				}
-}
-
-
-/* rumble events */
-
-static void rumble_show(bool on) {
-				printf("Toggled Rumble: ");
-				printf(on ? "Rumble on\n" : "Rumble off\n");
-}
-
-static void rumble_toggle(void) {
+// handles rumble on/off event
+static void rumble_toggle() {
 				static bool on = false;
 				int ret;
-
 				on = !on;
-				ret = xwii_iface_rumble(iface, on);
+				ret = xwii_iface_rumble(interface, on);
 				if (ret) {
 								on = !on;
 				}
-
-				rumble_show(on);
+				clear();
+				mvprintw(7, 0, "Toggled Rumble: ");
+				mvprintw(8, 0, on ? "Rumble on\n" : "Rumble off\n");
+				showCommands();
 }
 
-
-/* battery status */
-
-static void battery_show(uint8_t capacity) {
-				printf("Battery: %3u%%\n", capacity);
-}
-
-static void battery_refresh(void) {
+// display the current battery percentage
+static void battery_refresh() {
 				int ret;
 				uint8_t capacity;
-
-				ret = xwii_iface_get_battery(iface, &capacity);
-				if (!ret)
-								battery_show(capacity);
-}
-
-/* device type */
-
-static void devtype_refresh(void) {
-				int ret;
-				char *name;
-
-				ret = xwii_iface_get_devtype(iface, &name);
+				ret = xwii_iface_get_battery(interface, &capacity);
 				if (!ret) {
-								printf("%s\n", name);
-								free(name);
+								clear();
+								mvprintw(7, 0, "Battery: %3u%%\n", capacity);
+								showCommands();
 				}
 }
 
-
-/* basic window setup */
-
-static void refresh_all(void) {
-				battery_refresh();
-				devtype_refresh();
-}
-
-
-/* device watch events */
-
-static void handle_watch(void) {
-				static unsigned int num;
-				int ret;
-
-
-				ret = xwii_iface_open(iface, xwii_iface_available(iface) |
-				                             XWII_IFACE_WRITABLE);
-
-				refresh_all();
-}
-
-/* keyboard handling */
-
-static int keyboard(void) {
+// handle keyboard presses from user
+static int keyboard() {
 				int key;
-
 				key = getch();
 				if (key == ERR)
 								return 0;
@@ -171,28 +118,26 @@ static int keyboard(void) {
 								case 'r':
 												rumble_toggle();
 												break;
-								case 's':
-												refresh_all();
+								case 'b':
+												battery_refresh();
 												break;
 								case 'q':
 												return -ECANCELED;
 				}
-
 				return 0;
 }
 
-static int run_iface(struct xwii_iface *iface) {
+// terminal interface to display output and accept keystrokes
+static int run_interface(struct xwii_iface *interface) {
 				struct xwii_event event;
-				int ret = 0, fds_num;
+				int ret, fds_num;
 				struct pollfd fds[2];
-
 				memset(fds, 0, sizeof(fds));
 				fds[0].fd = 0;
 				fds[0].events = POLLIN;
-				fds[1].fd = xwii_iface_get_fd(iface);
+				fds[1].fd = xwii_iface_get_fd(interface);
 				fds[1].events = POLLIN;
 				fds_num = 2;
-
 				while (true) {
 								ret = poll(fds, fds_num, -1);
 								if (ret < 0) {
@@ -201,43 +146,39 @@ static int run_iface(struct xwii_iface *iface) {
 																break;
 												}
 								}
-
-								ret = xwii_iface_dispatch(iface, &event, sizeof(event));
-								if (ret) {
-
-								} else if (!freeze) {
+								ret = xwii_iface_dispatch(interface, &event, sizeof(event));
+								if (!ret) {
 												switch (event.type) {
 																case XWII_EVENT_WATCH:
-																				handle_watch();
+																				battery_refresh();
 																				break;
 																case XWII_EVENT_KEY:
 																				key_show(&event);
 																				break;
-
 												}
 								}
-
 								ret = keyboard();
-								if (ret == -ECANCELED)
+								if (ret == -ECANCELED) {
 												return 0;
-								else if (ret)
+								} else if (ret) {
 												return ret;
+								}
 								refresh();
 				}
 				return ret;
 }
 
+// scan for wii remotes
 static char *get_dev() {
 				struct xwii_monitor *mon;
 				char *ent;
 				int i = 0;
-
 				mon = xwii_monitor_new(false, false);
 				if (!mon) {
-								printf("Cannot create monitor\n");
+								printf("WiiClicker - Failed to monitor for Wii Remotes.\n");
 								return NULL;
 				}
-
+				// stop after finding the first remote
 				while ((ent = xwii_monitor_poll(mon))) {
 								if (++i == 1) {
 												break;
@@ -248,32 +189,23 @@ static char *get_dev() {
 				xwii_monitor_unref(mon);
 
 				if (!ent) {
-								// quit since there is no wii remote
-								printf("Cannot find device.\n");
+								// quit since there is no wii remote found
+								printf("WiiClicker - Please connect a Wii Remote to Bluetooth and try again.\n");
 								exit(0);
 				}
-
 				return ent;
 }
 
+// primary procedure
 int main(char **argv) {
 				int ret = 0;
 				char *path = NULL;
+				clear();
 
-//    if (argc < 2 || !strcmp(argv[1], "-h")) {
-//        printf("Usage:\n");
-//        printf("\txwiishow [-h]: Show help\n");
-//        printf("\txwiishow list: List connected devices\n");
-//        printf("\txwiishow <num>: Show device with number #num\n");
-//        printf("\txwiishow /sys/path/to/device: Show given device\n");
-//        printf("UI commands:\n");
-//        printf("\tq: Quit application\n");
-//        printf("\ts: Refresh static values (like battery or calibration)\n");
-//        printf("\tr: Toggle rumble motor\n");
+				// we always get the first wii remote connected
+				path = get_dev();
 
-				path = get_dev(1);
-
-				ret = xwii_iface_new(&iface, path ? path : argv[1]);
+				ret = xwii_iface_new(&interface, path ? path : argv[1]);
 				free(path);
 				if (!ret) {
 								initscr();
@@ -281,15 +213,14 @@ int main(char **argv) {
 								raw();
 								noecho();
 								timeout(0);
-								key_clear();
-								refresh_all();
+								battery_refresh();
+								showCommands();
 								refresh();
-
-								ret = xwii_iface_open(iface,
-								                      xwii_iface_available(iface) |
+								ret = xwii_iface_open(interface,
+								                      xwii_iface_available(interface) |
 								                      XWII_IFACE_WRITABLE);
-								ret = run_iface(iface);
-								xwii_iface_unref(iface);
+								ret = run_interface(interface);
+								xwii_iface_unref(interface);
 								if (ret) {
 												refresh();
 												timeout(-1);
@@ -297,6 +228,5 @@ int main(char **argv) {
 								}
 								endwin();
 				}
-
 				return abs(ret);
 }
