@@ -30,14 +30,11 @@ static bool locker = false;
 
 /* key events */
 
-
-
 static void key_show(const struct xwii_event *event) {
 
     //code to map presses to keyboard
     xdo_t *x = xdo_new(NULL);
     printf("Simulating keypress: ");
-
 
     unsigned int code = event->v.key.code;
     bool pressed = event->v.key.state;
@@ -140,8 +137,6 @@ static void battery_refresh(void) {
 
     ret = xwii_iface_get_battery(iface, &capacity);
     if (!ret)
-        //print_error("Error: Cannot read battery capacity");
-        //else
         battery_show(capacity);
 }
 
@@ -153,8 +148,6 @@ static void devtype_refresh(void) {
 
     ret = xwii_iface_get_devtype(iface, &name);
     if (!ret) {
-        // print_error("Error: Cannot read device type");
-        //} else {
         mvprintw(9, 28, "                                                   ");
         mvprintw(9, 28, "%s", name);
         free(name);
@@ -269,8 +262,6 @@ static int run_iface(struct xwii_iface *iface) {
     fds[1].events = POLLIN;
     fds_num = 2;
 
-    ret = xwii_iface_watch(iface, true);
-
     while (true) {
         ret = poll(fds, fds_num, -1);
         if (ret < 0) {
@@ -346,13 +337,16 @@ static char *get_dev() {
 
     xwii_monitor_unref(mon);
 
-    if (!ent)
+    if (!ent) {
         printf("Cannot find device.\n");
+        // quit since there is no wii remote
+        exit(0);
+    }
 
     return ent;
 }
 
-int main(int argc, char **argv) {
+int main(char **argv) {
     int ret = 0;
     char *path = NULL;
 
