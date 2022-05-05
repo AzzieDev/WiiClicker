@@ -61,10 +61,10 @@ static void key_show(const struct xwii_event * event) {
 												mvprintw(8, 0, "Home button - Escape key keyboard press simulated");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "Escape", 0);
 								} else if (code == XWII_KEY_MINUS) {
-												mvprintw(8, 0, "Minus button - Decreasing volume");
+												mvprintw(8, 0, "Minus button - Decreasing audio volume");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "XF86AudioLowerVolume", 0);
 								} else if (code == XWII_KEY_PLUS) {
-												mvprintw(8, 0, "Plus button - Increasing volume");
+												mvprintw(8, 0, "Plus button - Increasing audio volume");
 												xdo_send_keysequence_window(x, CURRENTWINDOW, "XF86AudioRaiseVolume", 0);
 								} else if (code == XWII_KEY_ONE) {
 												mvprintw(8, 0, "One button - Page Up key keyboard press simulated");
