@@ -61,35 +61,26 @@ static void key_show(const struct xwii_event *event) {
             printf("Down arrow\n");
             xdo_send_keysequence_window(x, CURRENTWINDOW, "Down", 0);
         } else if (code == XWII_KEY_A) {
-            if (pressed)
-                str = "A";
-            mvprintw(10, 5, "%s", str);
+            printf("A button - Spacebar\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "space", 0);
         } else if (code == XWII_KEY_B) {
-            if (pressed)
-                str = "B";
-            mvprintw(10, 13, "%s", str);
+            printf("B button - F5 key\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "F5", 0);
         } else if (code == XWII_KEY_HOME) {
-            if (pressed)
-                str = "HOME+";
-            else
-                str = "     ";
-            mvprintw(13, 7, "%s", str);
+            printf("Home button - Escape key\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "Escape", 0);
         } else if (code == XWII_KEY_MINUS) {
-            if (pressed)
-                str = "-";
-            mvprintw(13, 3, "%s", str);
+            printf("Minus button - Decrease volume\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "XF86AudioLowerVolume", 0);
         } else if (code == XWII_KEY_PLUS) {
-            if (pressed)
-                str = "+";
-            mvprintw(13, 15, "%s", str);
+            printf("Plus button - Increase volume\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "XF86AudioRaiseVolume", 0);
         } else if (code == XWII_KEY_ONE) {
-            if (pressed)
-                str = "1";
-            mvprintw(20, 9, "%s", str);
+            printf("One button - Page Up key\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "Page_Up", 0);
         } else if (code == XWII_KEY_TWO) {
-            if (pressed)
-                str = "2";
-            mvprintw(21, 9, "%s", str);
+            printf("Two button - Page Down key\n");
+            xdo_send_keysequence_window(x, CURRENTWINDOW, "Page_Down", 0);
         }
     }
     locker = !locker;
