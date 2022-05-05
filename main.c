@@ -345,7 +345,7 @@ static char *get_dev() {
     xwii_monitor_unref(mon);
 
     if (!ent)
-        printf("Cannot find device.");
+        printf("Cannot find device.\n");
 
     return ent;
 }
@@ -362,27 +362,14 @@ int main(int argc, char **argv) {
 //        printf("\txwiishow /sys/path/to/device: Show given device\n");
 //        printf("UI commands:\n");
 //        printf("\tq: Quit application\n");
-//        printf("\tf: Freeze/Unfreeze screen\n");
 //        printf("\ts: Refresh static values (like battery or calibration)\n");
-//        printf("\tk: Toggle key events\n");
 //        printf("\tr: Toggle rumble motor\n");
-//        ret = -1;
-//    } else
-//        if (!strcmp(argv[1], "list")) {
-//        printf("Listing connected Wii Remote devices:\n");
-//        ret = enumerate();
-//        printf("End of device list\n");
-//    } else {
-//        if (argv[1][0] != '/')
+
     path = get_dev(1);
 
     ret = xwii_iface_new(&iface, path ? path : argv[1]);
     free(path);
-    if (ret) {
-        printf("Cannot create xwii_iface '%s' err:%d\n",
-               argv[1], ret);
-    } else {
-
+    if (!ret) {
         initscr();
         curs_set(0);
         raw();
