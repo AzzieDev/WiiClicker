@@ -1,5 +1,9 @@
 # WiiClicker
 
+## Video Demo:
+[![WiiClicker Demonstration Tutorial](https://img.youtube.com/vi/d0BpMvy9pCk/0.jpg)](https://www.youtube.com/watch?v=d0BpMvy9pCk)
+
+
 ## Maps these 11 Wii Remote buttons to the following keys:
 
 0	XWII_KEY_LEFT, = Left arrow key 
